@@ -7,10 +7,9 @@ require_relative "../lib/request.rb"
 def show_banner(parser)
   puts parser
   puts
-  puts %q{Commands:
-  pull [file]    [--api_key <key>] [--user <user>] [--key <key>] [--sets <id ..>] [--rcfile <file>]
-  push [file ..] [--api_key <key>] [--user <user>] [--key <key>] [--sets <id ..>] [--rcfile <file>]
-  conf           [--api_key <key>] [--user <user>] [--key <key>] [--rcfile <file>]}
+  puts %q{commands:
+  pull [--api_key <key>] [--user <user>] [--key <key>] [--sets <id ..>] [--rcfile <file>]
+  conf [--api_key <key>] [--user <user>] [--key <key>] [--rcfile <file>]}
 end
 
 def parse!
@@ -22,13 +21,12 @@ def parse!
     rcfile: "~/.qzierc",
   }
   commands = [
-    :push,
     :pull,
     :conf,
   ]
 
   parser = OptionParser.new do |opts|
-    opts.banner = "usage: #{File.basename $PROGRAM_NAME} <command> [file ..] [options]"
+    opts.banner = "usage: #{File.basename $PROGRAM_NAME} <command> [options]"
 
     opts.on('--api_key <key>', 'Quizlet Client ID (defaults to api_key in rcfile)') do |key|
       options[:api_key] = key
@@ -67,11 +65,6 @@ def parse!
 
     case command
 
-    when :push
-      options = options.reject {|_, val| val.nil?}
-      options = get_options_from_rcfile(File.expand_path(options[:rcfile]), options)
-      raise "not implemented"
-
     when :pull
       options = options.reject {|_, val| val.nil?}
       options = get_options_from_rcfile(File.expand_path(options[:rcfile]), options)
@@ -107,6 +100,7 @@ def parse!
   rescue Exception => exception
     # puts exception.backtrace
     puts exception
+    puts
     show_banner(parser)
     exit 1
   end
@@ -114,7 +108,7 @@ end
 
 def get_options_from_rcfile(filename, options)
   if !File.exists?(filename)
-    warn "configuration file not found: #{filename}"
+    warn "warning: configuration file not found: #{filename}"
     return options
   end
 

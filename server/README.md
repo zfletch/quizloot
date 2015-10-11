@@ -15,6 +15,7 @@ You just need a Quizlet account and then you can sign up for a developer key.
 - Fill out the fields.
 - The information you enter isn't important. If you don't have a website, you can put 'example' in the 'URI our servers should redirect to' field for now.
 - Click 'Generate Dev Key'
+- Your `api_token` is listed under "Your Quizlet Client ID"
 
 ## User Access Token
 
