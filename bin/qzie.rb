@@ -8,13 +8,13 @@ def show_banner(parser)
   puts parser
   puts
   puts %q{commands:
-  pull [--api_key <key>] [--user <user>] [--key <key>] [--sets <id ..>] [--rcfile <file>]
+  pull [--api_key <key>] [--user <user>] [--key <key>] [--sets <id ..>] [--rcfile <file>] [--with_meta]
   conf [--api_key <key>] [--user <user>] [--key <key>] [--rcfile <file>]}
 end
 
 def parse!
   options = {
-    api_key: nil,
+    api_key: "PB8AujhFBa",
     user: nil,
     key: nil,
     sets: nil,
@@ -28,7 +28,7 @@ def parse!
   parser = OptionParser.new do |opts|
     opts.banner = "usage: #{File.basename $PROGRAM_NAME} <command> [options]"
 
-    opts.on('--api_key <key>', 'Quizlet Client ID (defaults to api_key in rcfile)') do |key|
+    opts.on('--api_key <key>', 'Quizlet Client ID (defaults to Quizloot key then api_key in rcfile)') do |key|
       options[:api_key] = key
     end
 
@@ -42,6 +42,10 @@ def parse!
 
     opts.on('--sets <id ..>', Array, 'list of set IDs (defaults to all sets if user given)') do |sets|
       options[:sets] = sets
+    end
+
+    opts.on('--with_meta', 'Show set metadata in in addition to id, title, and terms') do
+      options[:with_meta] = true
     end
 
     opts.on('--rcfile <file>', 'file with configuration options (defaults to ~/.qzierc)') do |file|
@@ -72,15 +76,15 @@ def parse!
 
       if options[:key] && options[:user] && !options[:sets]
         json = request.get_all_user_sets(user: options[:user])
-        puts JSON.pretty_generate(json)
+        puts pretty_json(json, with_meta: options[:with_meta])
       elsif options[:key] && options[:sets]
         json = request.get_user_sets(set_ids: options[:sets])
-        puts JSON.pretty_generate(json)
+        puts pretty_json(json, with_meta: options[:with_meta])
       elsif options[:api_key] && options[:sets]
         json = request.get_public_sets(set_ids: options[:sets])
-        puts JSON.pretty_generate(json)
+        puts pretty_json(json, with_meta: options[:with_meta])
       else
-        raise "pull requires a user key, user key and list of sets, or api key and list of sets"
+        raise "pull requires a user key, user key and list of sets, or a list of sets"
       end
 
     when :conf
@@ -129,6 +133,19 @@ end
 
 def read_conf_file(filename)
   puts JSON.pretty_generate(JSON.parse(File.read(filename), symbolize_names: true))
+end
+
+def hash_slice(hash, keys)
+  hash.select { |k, _| keys.member?(k) }
+end
+
+def pretty_json(json, with_meta: false)
+  default_keys = ["id", "title", "terms"]
+  if !with_meta
+    json = json.map { |set| hash_slice(set, default_keys) }
+  end
+
+  JSON.pretty_generate(json)
 end
 
 parse!
