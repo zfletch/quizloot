@@ -112,7 +112,6 @@ end
 
 def get_options_from_rcfile(filename, options)
   if !File.exists?(filename)
-    warn "warning: configuration file not found: #{filename}"
     return options
   end
 
