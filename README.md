@@ -1,5 +1,7 @@
 # Quizloot
 
+## Quizlet turned off their API on January 31, 2020. This repository is now archived.
+
 Quizlet Command Line API Tool.
 
 [Quizlet](https://quizlet.com) is a website that allows users to
